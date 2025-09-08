@@ -253,7 +253,21 @@ export const useInventory = () => {
   // Allow user to connect or create the master jd.json once
   const connectMasterJson = useCallback(async () => {
     try {
-      const handle = await getOrCreateMasterFile()
+      // Prefer creating a file named after the company
+      const suggested = `${(stateRef.current.businessLine || 'company').replace(
+        /[^a-z0-9\-_]+/gi,
+        '-'
+      )}.json`
+      let handle = await (async () => {
+        // Try direct create with suggested name
+        const mod = await import('../utils/fileAccess')
+        const created = await mod.createNamedMasterFile(suggested)
+        return created ?? null
+      })()
+      if (!handle) {
+        // Fallback to generic selector
+        handle = await getOrCreateMasterFile()
+      }
       if (handle) {
         setFileHandle(handle)
         const fileData = await readFromHandle<InventoryState>(handle)

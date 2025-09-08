@@ -162,6 +162,31 @@ export const getOrCreateMasterFile =
     return null
   }
 
+export const createNamedMasterFile = async (
+  suggestedName: string
+): Promise<FileSystemFileHandle | null> => {
+  if (!isFsAccessSupported()) return null
+  try {
+    const save: any = (window as any).showSaveFilePicker
+    if (save) {
+      const handle: FileSystemFileHandle = await save({
+        suggestedName,
+        types: [
+          {
+            description: 'JSON Files',
+            accept: { 'application/json': ['.json'] },
+          },
+        ],
+      })
+      await storeHandle(handle)
+      return handle
+    }
+  } catch {
+    return null
+  }
+  return null
+}
+
 export const readFromHandle = async <T = any>(
   handle: FileSystemFileHandle
 ): Promise<T | null> => {
