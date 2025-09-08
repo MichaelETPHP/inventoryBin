@@ -76,6 +76,7 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
         {/* Action Buttons */}
         <div className='flex flex-wrap gap-3 items-center justify-center sm:justify-start'>
           <button
+            data-tour-id='add-row'
             onClick={onAddEntry}
             className='flex items-center gap-1 md:gap-2 bg-green-600 text-white px-3 py-2 md:px-4 md:py-3 rounded-lg hover:bg-green-700 transition-colors duration-200 shadow-md font-medium text-sm md:text-base'
           >
@@ -84,6 +85,7 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
           </button>
 
           <button
+            data-tour-id='set-balance'
             onClick={onSetStartingBalance}
             className='flex items-center gap-1 md:gap-2 bg-amber-600 text-white px-3 py-2 md:px-4 md:py-3 rounded-lg hover:bg-amber-700 transition-colors duration-200 shadow-md font-medium text-sm md:text-base'
           >
@@ -92,6 +94,7 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
           </button>
 
           <button
+            data-tour-id='clear-all'
             onClick={onClearAll}
             className='flex items-center gap-1 md:gap-2 bg-red-600 text-white px-3 py-2 md:px-4 md:py-3 rounded-lg hover:bg-red-700 transition-colors duration-200 shadow-md font-medium text-sm md:text-base'
           >
@@ -101,6 +104,7 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
 
           {/* Connect master jd.json */}
           <button
+            data-tour-id='connect-server'
             onClick={onConnectMasterJson}
             disabled={!!isConnected}
             className={`flex items-center gap-1 md:gap-2 px-3 py-2 md:px-4 md:py-3 rounded-lg transition-colors duration-200 shadow-md font-medium text-sm md:text-base ${

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { useInventory } from './hooks/useInventory'
 import { Header } from './components/Header'
 import { Summary } from './components/Summary'
@@ -7,6 +7,7 @@ import { InventoryTable } from './components/InventoryTable'
 import { ConfirmDialog } from './components/ConfirmDialog'
 import { StartingBalanceDialog } from './components/StartingBalanceDialog'
 // Removed CSV/Print utilities
+import { Tour } from './components/Tour'
 
 function App() {
   const {
@@ -28,6 +29,14 @@ function App() {
 
   const [showClearDialog, setShowClearDialog] = useState(false)
   const [showBalanceDialog, setShowBalanceDialog] = useState(false)
+  const [tourOpen, setTourOpen] = useState(false)
+
+  // Listen for open_tour event from hook
+  React.useEffect(() => {
+    const handler = () => setTourOpen(true)
+    window.addEventListener('open_tour', handler)
+    return () => window.removeEventListener('open_tour', handler)
+  }, [])
 
   const handleClearAll = () => {
     if (state.entries.length > 0) {
@@ -71,6 +80,39 @@ function App() {
           onSetStartingBalance={handleSetStartingBalance}
           onConnectMasterJson={connectMasterJson}
           isConnected={isConnected}
+        />
+
+        {/* Guided Tour (first-time) */}
+        <Tour
+          isOpen={tourOpen}
+          onClose={() => {
+            setTourOpen(false)
+            try {
+              localStorage.setItem('tour_shown', '1')
+            } catch {}
+          }}
+          steps={[
+            {
+              id: 'connect-server',
+              title: 'Connect to Server',
+              text: 'Create or select your company JSON (e.g., companyName.json).',
+            },
+            {
+              id: 'add-row',
+              title: 'Add Row',
+              text: 'Insert an inventory record: date, notes, amounts and signer.',
+            },
+            {
+              id: 'set-balance',
+              title: 'Set Balance',
+              text: 'Optionally set a starting balance to calculate running totals.',
+            },
+            {
+              id: 'clear-all',
+              title: 'Clear All',
+              text: 'Remove all entries when you want to reset the sheet.',
+            },
+          ]}
         />
 
         <InventoryTable
@@ -129,6 +171,14 @@ function App() {
               changes.
             </li>
           </ol>
+          <div className='mt-4'>
+            <button
+              onClick={() => setTourOpen(true)}
+              className='px-3 py-2 rounded bg-amber-600 text-white hover:bg-amber-700 text-sm'
+            >
+              View Quick Tour
+            </button>
+          </div>
         </div>
       </footer>
 

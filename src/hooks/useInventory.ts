@@ -35,6 +35,14 @@ export const useInventory = () => {
 
   // Load data from localStorage on mount
   useEffect(() => {
+    // Show the tour on first load
+    try {
+      if (!localStorage.getItem('tour_shown')) {
+        const evt = new CustomEvent('open_tour')
+        window.dispatchEvent(evt)
+      }
+    } catch {}
+
     const stored = loadFromStorage()
     if (stored) {
       setState(stored)
