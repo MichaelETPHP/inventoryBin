@@ -77,25 +77,25 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
         <div className='flex flex-wrap gap-3 items-center justify-center sm:justify-start'>
           <button
             onClick={onAddEntry}
-            className='flex items-center gap-2 bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-700 transition-colors duration-200 shadow-md font-medium'
+            className='flex items-center gap-1 md:gap-2 bg-green-600 text-white px-3 py-2 md:px-4 md:py-3 rounded-lg hover:bg-green-700 transition-colors duration-200 shadow-md font-medium text-sm md:text-base'
           >
-            <Plus className='w-4 h-4' />
+            <Plus className='w-4 h-4 md:w-4 md:h-4' />
             Add Row
           </button>
 
           <button
             onClick={onSetStartingBalance}
-            className='flex items-center gap-2 bg-amber-600 text-white px-4 py-3 rounded-lg hover:bg-amber-700 transition-colors duration-200 shadow-md font-medium'
+            className='flex items-center gap-1 md:gap-2 bg-amber-600 text-white px-3 py-2 md:px-4 md:py-3 rounded-lg hover:bg-amber-700 transition-colors duration-200 shadow-md font-medium text-sm md:text-base'
           >
-            <Settings className='w-4 h-4' />
+            <Settings className='w-4 h-4 md:w-4 md:h-4' />
             Set Balance
           </button>
 
           <button
             onClick={onClearAll}
-            className='flex items-center gap-2 bg-red-600 text-white px-4 py-3 rounded-lg hover:bg-red-700 transition-colors duration-200 shadow-md font-medium'
+            className='flex items-center gap-1 md:gap-2 bg-red-600 text-white px-3 py-2 md:px-4 md:py-3 rounded-lg hover:bg-red-700 transition-colors duration-200 shadow-md font-medium text-sm md:text-base'
           >
-            <Trash2 className='w-4 h-4' />
+            <Trash2 className='w-4 h-4 md:w-4 md:h-4' />
             Clear All
           </button>
 
@@ -103,13 +103,13 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
           <button
             onClick={onConnectMasterJson}
             disabled={!!isConnected}
-            className={`flex items-center gap-2 px-4 py-3 rounded-lg transition-colors duration-200 shadow-md font-medium ${
+            className={`flex items-center gap-1 md:gap-2 px-3 py-2 md:px-4 md:py-3 rounded-lg transition-colors duration-200 shadow-md font-medium text-sm md:text-base ${
               isConnected
                 ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
                 : 'bg-gray-700 text-white hover:bg-gray-800'
             }`}
           >
-            <Database className='w-4 h-4' />
+            <Database className='w-4 h-4 md:w-4 md:h-4' />
             Connect to Server
           </button>
         </div>
