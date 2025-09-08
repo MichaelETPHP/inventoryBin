@@ -108,6 +108,30 @@ function App() {
         onCancel={() => setShowBalanceDialog(false)}
       />
 
+      {/* Help / How to use */}
+      <footer className='max-w-7xl mx-auto p-6 pt-0 text-sm text-gray-700'>
+        <div className='bg-white rounded-lg shadow-md p-6 mt-6'>
+          <h2 className='text-lg font-semibold text-amber-900 mb-3'>Help</h2>
+          <p className='mb-4'>How to use the application:</p>
+          <ol className='list-decimal pl-5 space-y-2'>
+            <li>
+              Click <span className='font-medium'>Connect to Server</span> and
+              create/select a JSON file named after your company, e.g.{' '}
+              <span className='font-mono'>companyName.json</span>.
+            </li>
+            <li>
+              After connecting, click{' '}
+              <span className='font-medium'>Add Row</span> and enter your
+              inventory details.
+            </li>
+            <li>
+              Your data is saved automatically to the connected file as you make
+              changes.
+            </li>
+          </ol>
+        </div>
+      </footer>
+
       {/* Print Styles */}
       <style>{`
         @media print {
