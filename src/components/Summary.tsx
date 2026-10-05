@@ -7,47 +7,53 @@ interface SummaryProps {
 }
 
 export const Summary: React.FC<SummaryProps> = ({ stats }) => {
+  const items = [
+    {
+      label: 'Total in',
+      value: stats.totalIn,
+      icon: TrendingUp,
+      tone: 'text-emerald-700',
+      chip: 'bg-emerald-50 text-emerald-600',
+    },
+    {
+      label: 'Total out',
+      value: stats.totalOut,
+      icon: TrendingDown,
+      tone: 'text-rose-700',
+      chip: 'bg-rose-50 text-rose-600',
+    },
+    {
+      label: 'Current balance',
+      value: stats.currentBalance,
+      icon: Scale,
+      tone: stats.currentBalance >= 0 ? 'text-brand-700' : 'text-rose-700',
+      chip: 'bg-brand-50 text-brand-700',
+    },
+    {
+      label: 'Total entries',
+      value: stats.entryCount,
+      icon: Hash,
+      tone: 'text-ink-900',
+      chip: 'bg-gold-50 text-gold-700',
+      integer: true,
+    },
+  ];
+
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-      <div className="bg-white rounded-lg shadow-md p-4 border-l-4 border-green-500">
-        <div className="flex items-center">
-          <TrendingUp className="w-8 h-8 text-green-500" />
-          <div className="ml-3">
-            <p className="text-sm font-medium text-gray-600">Total In</p>
-            <p className="text-2xl font-bold text-gray-900">{stats.totalIn}</p>
+    <div className="bg-white rounded-xl shadow-panel border border-cream-200 grid grid-cols-2 lg:grid-cols-4 divide-x divide-y lg:divide-y-0 divide-cream-200 mb-6 overflow-hidden">
+      {items.map(({ label, value, icon: Icon, tone, chip, integer }) => (
+        <div key={label} className="p-4 sm:p-5 flex items-center gap-3">
+          <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${chip}`}>
+            <Icon className="w-5 h-5" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-xs font-medium text-ink-500 uppercase tracking-wide leading-tight">{label}</p>
+            <p className={`text-xl sm:text-2xl font-semibold tabular-nums ${tone}`}>
+              {integer ? value : value.toFixed(2)}
+            </p>
           </div>
         </div>
-      </div>
-
-      <div className="bg-white rounded-lg shadow-md p-4 border-l-4 border-red-500">
-        <div className="flex items-center">
-          <TrendingDown className="w-8 h-8 text-red-500" />
-          <div className="ml-3">
-            <p className="text-sm font-medium text-gray-600">Total Out</p>
-            <p className="text-2xl font-bold text-gray-900">{stats.totalOut}</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-white rounded-lg shadow-md p-4 border-l-4 border-blue-500">
-        <div className="flex items-center">
-          <Scale className="w-8 h-8 text-blue-500" />
-          <div className="ml-3">
-            <p className="text-sm font-medium text-gray-600">Current Balance</p>
-            <p className="text-2xl font-bold text-gray-900">{stats.currentBalance}</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-white rounded-lg shadow-md p-4 border-l-4 border-purple-500">
-        <div className="flex items-center">
-          <Hash className="w-8 h-8 text-purple-500" />
-          <div className="ml-3">
-            <p className="text-sm font-medium text-gray-600">Total Entries</p>
-            <p className="text-2xl font-bold text-gray-900">{stats.entryCount}</p>
-          </div>
-        </div>
-      </div>
+      ))}
     </div>
   );
 };

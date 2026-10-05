@@ -32,14 +32,21 @@ export const useInventory = () => {
   })
   const [fileHandle, setFileHandle] = useState<any>(null)
   const writeTimeoutRef = useRef<any>(null)
+  const [toast, setToast] = useState<{ id: number; message: string } | null>(
+    null
+  )
+  const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Load data from localStorage on mount
   useEffect(() => {
-    // Show the tour on first load
+    // Show the tour on first load. Deferred a tick so App's 'open_tour'
+    // listener (registered in its own mount effect) is attached first —
+    // dispatching synchronously here can race ahead of it.
     try {
       if (!localStorage.getItem('tour_shown')) {
-        const evt = new CustomEvent('open_tour')
-        window.dispatchEvent(evt)
+        setTimeout(() => {
+          window.dispatchEvent(new CustomEvent('open_tour'))
+        }, 0)
       }
     } catch {}
 
@@ -86,6 +93,24 @@ export const useInventory = () => {
     stateRef.current = state
   }, [state])
 
+  // Debounced "Saved" toast: called from the mutators below, not from
+  // hydration (initial load / connecting to a file), so it only ever
+  // confirms something the user actually changed. Rapid edits — typing
+  // a field — settle into a single toast after the user pauses instead
+  // of firing once per keystroke.
+  const scheduleSavedToast = useCallback(() => {
+    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current)
+    toastTimeoutRef.current = setTimeout(() => {
+      setToast({ id: Date.now(), message: 'Saved' })
+    }, 700)
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current)
+    }
+  }, [])
+
   // Persist to master jd.json whenever state changes (debounced)
   useEffect(() => {
     if (!fileHandle) return
@@ -107,8 +132,9 @@ export const useInventory = () => {
   const updateBusinessInfo = useCallback(
     (businessLine: string, department: string) => {
       setState((prev) => ({ ...prev, businessLine, department }))
+      scheduleSavedToast()
     },
-    []
+    [scheduleSavedToast]
   )
 
   const addEntry = useCallback(() => {
@@ -130,7 +156,8 @@ export const useInventory = () => {
         entries: recalculateAllBalances(newEntries, prev.startingBalance),
       }
     })
-  }, [state.entries.length])
+    scheduleSavedToast()
+  }, [state.entries.length, scheduleSavedToast])
 
   const updateEntry = useCallback(
     (id: string, field: keyof InventoryEntry, value: any) => {
@@ -147,8 +174,9 @@ export const useInventory = () => {
 
         return { ...prev, entries: entriesWithBalances }
       })
+      scheduleSavedToast()
     },
-    []
+    [scheduleSavedToast]
   )
 
   const deleteEntry = useCallback((id: string) => {
@@ -162,7 +190,8 @@ export const useInventory = () => {
         entries: recalculateAllBalances(filteredEntries, prev.startingBalance),
       }
     })
-  }, [])
+    scheduleSavedToast()
+  }, [scheduleSavedToast])
 
   const duplicateEntry = useCallback((id: string) => {
     setState((prev) => {
@@ -182,7 +211,8 @@ export const useInventory = () => {
         entries: recalculateAllBalances(newEntries, prev.startingBalance),
       }
     })
-  }, [])
+    scheduleSavedToast()
+  }, [scheduleSavedToast])
 
   const clearAllData = useCallback(() => {
     setState(initialState)
@@ -194,7 +224,8 @@ export const useInventory = () => {
       startingBalance: balance,
       entries: recalculateAllBalances(prev.entries, balance),
     }))
-  }, [])
+    scheduleSavedToast()
+  }, [scheduleSavedToast])
 
   const loadFromJson = useCallback((data: InventoryState) => {
     setState((prev) => {
@@ -335,5 +366,6 @@ export const useInventory = () => {
     manualSave,
     connectMasterJson,
     isConnected: !!fileHandle,
+    toast,
   }
 }

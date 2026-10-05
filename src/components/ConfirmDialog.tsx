@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { AlertTriangle } from 'lucide-react';
+import { usePresence } from '../hooks/usePresence';
 
 interface ConfirmDialogProps {
   isOpen: boolean;
@@ -22,15 +23,28 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   onCancel,
   type = 'warning'
 }) => {
-  if (!isOpen) return null;
+  const mounted = usePresence(isOpen);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onCancel();
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [isOpen, onCancel]);
+
+  if (!mounted) return null;
+
+  const state = isOpen ? 'open' : 'closed';
 
   const getColorClasses = () => {
     switch (type) {
       case 'danger':
         return {
-          bg: 'bg-red-50',
-          icon: 'text-red-600',
-          button: 'bg-red-600 hover:bg-red-700'
+          bg: 'bg-rose-50',
+          icon: 'text-rose-600',
+          button: 'bg-rose-600 hover:bg-rose-700'
         };
       case 'info':
         return {
@@ -40,9 +54,9 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         };
       default:
         return {
-          bg: 'bg-amber-50',
-          icon: 'text-amber-600',
-          button: 'bg-amber-600 hover:bg-amber-700'
+          bg: 'bg-gold-50',
+          icon: 'text-gold-700',
+          button: 'bg-brand-700 hover:bg-brand-800'
         };
     }
   };
@@ -50,29 +64,45 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   const colors = getColorClasses();
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
-        <div className={`${colors.bg} px-6 py-4 rounded-t-lg`}>
+    <div
+      data-state={state}
+      onClick={onCancel}
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-ink-900/0 backdrop-blur-0 transition-colors duration-300 ease-out data-[state=open]:bg-ink-900/50 data-[state=open]:backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="confirm-dialog-title"
+    >
+      <div
+        data-state={state}
+        onClick={(e) => e.stopPropagation()}
+        className="w-full sm:max-w-md bg-white rounded-t-2xl sm:rounded-xl overflow-hidden shadow-panel-lg translate-y-full opacity-0 sm:translate-y-0 sm:scale-95 transition-[transform,opacity] duration-300 ease-drawer sm:ease-out-strong data-[state=open]:translate-y-0 data-[state=open]:opacity-100 sm:data-[state=open]:scale-100"
+      >
+        <div className="sm:hidden flex justify-center pt-2.5 pb-1">
+          <div className="w-9 h-1 rounded-full bg-cream-200" />
+        </div>
+
+        <div className={`${colors.bg} px-6 py-4`}>
           <div className="flex items-center gap-3">
             <AlertTriangle className={`w-6 h-6 ${colors.icon}`} />
-            <h3 className="text-lg font-bold text-gray-900">{title}</h3>
+            <h3 id="confirm-dialog-title" className="text-lg font-semibold text-ink-900">{title}</h3>
           </div>
         </div>
-        
+
         <div className="px-6 py-4">
-          <p className="text-gray-700">{message}</p>
+          <p className="text-ink-700">{message}</p>
         </div>
-        
-        <div className="px-6 py-4 bg-gray-50 rounded-b-lg flex gap-3 justify-end">
+
+        <div className="px-6 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:pb-4 bg-cream-50 flex gap-3 justify-end">
           <button
             onClick={onCancel}
-            className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors duration-200"
+            className="px-4 py-2 text-ink-700 border border-cream-200 rounded-lg hover:bg-white transition duration-150 ease-out active:scale-[0.97]"
           >
             {cancelText}
           </button>
           <button
             onClick={onConfirm}
-            className={`px-4 py-2 text-white rounded-lg transition-colors duration-200 ${colors.button}`}
+            autoFocus
+            className={`px-4 py-2 text-white rounded-lg transition duration-150 ease-out active:scale-[0.97] ${colors.button}`}
           >
             {confirmText}
           </button>

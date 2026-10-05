@@ -137,12 +137,14 @@ interface InventoryEntry {
 
 ## Styling
 
-The application uses a soft pink/peach color scheme (`#FFE8E5`) with:
-- Golden/yellow table headers (`#F4D03F`)
-- Professional typography and spacing
-- Smooth hover animations
-- Print-optimized layouts
-- Mobile-responsive breakpoints
+The application uses a deep maroon and gold identity drawn from the JD Bar & Restaurant mark, on a warm cream surface:
+- `brand` (maroon, `#3A1714`–`#8F3832`) for primary actions and the table header
+- `gold` (`#BD9435`–`#F3E6BD`) for accents and the premium-service badge
+- `cream` (`#FDFAF4`–`#EFE3CC`) for backgrounds and input fills
+- Fraunces for the display wordmark, Inter for UI and data (both self-hosted, no CDN dependency)
+- Tabular numerals throughout the ledger for honest column alignment
+- Themed selection, focus rings, and scrollbars — no unstyled browser chrome
+- Print-optimized layouts and mobile-responsive breakpoints
 
 ## Browser Support
 

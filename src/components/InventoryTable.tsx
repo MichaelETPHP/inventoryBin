@@ -1,7 +1,7 @@
-import React from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { InventoryEntry } from '../types'
 import { InventoryRow } from './InventoryRow'
-import { Trash2, Copy } from 'lucide-react'
+import { MobileEntryCard } from './MobileEntryCard'
 
 interface InventoryTableProps {
   entries: InventoryEntry[]
@@ -16,10 +16,38 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
   onDeleteEntry,
   onDuplicateEntry,
 }) => {
+  // Mobile accordion: only one entry open at a time. A freshly added
+  // entry opens itself and collapses whatever was open before it.
+  const [expandedId, setExpandedId] = useState<string | null>(
+    entries[0]?.id ?? null
+  )
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
+  const prevIdsRef = useRef<string[]>(entries.map((e) => e.id))
+
+  useEffect(() => {
+    const prevIds = prevIdsRef.current
+    const addedEntry = entries.find((e) => !prevIds.includes(e.id))
+
+    if (addedEntry) {
+      setExpandedId(addedEntry.id)
+    } else if (expandedId && !entries.some((e) => e.id === expandedId)) {
+      // The expanded entry was deleted — fall back to the first remaining one.
+      setExpandedId(entries[0]?.id ?? null)
+    }
+
+    prevIdsRef.current = entries.map((e) => e.id)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [entries])
+
+  const toggleExpanded = (id: string) => {
+    setConfirmDeleteId(null)
+    setExpandedId((curr) => (curr === id ? null : id))
+  }
+
   if (entries.length === 0) {
     return (
-      <div className='bg-white rounded-lg shadow-md p-12 text-center'>
-        <div className='text-gray-400 text-lg'>
+      <div className='bg-white rounded-xl shadow-panel border border-cream-200 p-16 text-center'>
+        <div className='text-ink-500'>
           No inventory entries yet. Click "Add Row" to get started.
         </div>
       </div>
@@ -27,164 +55,60 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
   }
 
   return (
-    <div className='bg-white rounded-lg shadow-md overflow-hidden'>
-      {/* Mobile: card list */}
-      <div className='md:hidden divide-y divide-gray-200'>
+    <div className='bg-white rounded-xl shadow-panel border border-cream-200 overflow-hidden'>
+      {/* Mobile: accordion card list */}
+      <div className='md:hidden divide-y divide-cream-200'>
         {entries.map((entry) => (
-          <div key={entry.id} className='p-4'>
-            <div className='flex items-center justify-between mb-3'>
-              <div className='text-sm text-gray-500'>No</div>
-              <div className='text-base font-semibold'>{entry.no}</div>
-            </div>
-
-            <div className='grid grid-cols-1 gap-3'>
-              <label className='block'>
-                <div className='text-sm text-gray-600 mb-1'>Date</div>
-                <input
-                  type='date'
-                  value={entry.date}
-                  onChange={(e) =>
-                    onUpdateEntry(entry.id, 'date', e.target.value)
-                  }
-                  className='w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent'
-                />
-              </label>
-
-              <label className='block'>
-                <div className='text-sm text-gray-600 mb-1'>Notes (Name)</div>
-                <input
-                  type='text'
-                  value={entry.notes}
-                  onChange={(e) =>
-                    onUpdateEntry(entry.id, 'notes', e.target.value)
-                  }
-                  placeholder='Item description'
-                  className='w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent'
-                />
-              </label>
-
-              <div className='grid grid-cols-2 gap-3'>
-                <label className='block'>
-                  <div className='text-sm text-gray-600 mb-1'>In</div>
-                  <input
-                    type='number'
-                    min='0'
-                    step='0.01'
-                    value={entry.in}
-                    onChange={(e) =>
-                      onUpdateEntry(
-                        entry.id,
-                        'in',
-                        Math.max(0, parseFloat(e.target.value) || 0)
-                      )
-                    }
-                    className='w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-green-700'
-                  />
-                </label>
-                <label className='block'>
-                  <div className='text-sm text-gray-600 mb-1'>Out</div>
-                  <input
-                    type='number'
-                    min='0'
-                    step='0.01'
-                    value={entry.out}
-                    onChange={(e) =>
-                      onUpdateEntry(
-                        entry.id,
-                        'out',
-                        Math.max(0, parseFloat(e.target.value) || 0)
-                      )
-                    }
-                    className='w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-red-700'
-                  />
-                </label>
-              </div>
-
-              <div className='grid grid-cols-2 gap-3 items-end'>
-                <label className='block'>
-                  <div className='text-sm text-gray-600 mb-1'>Sign</div>
-                  <input
-                    type='text'
-                    value={entry.sign}
-                    onChange={(e) =>
-                      onUpdateEntry(entry.id, 'sign', e.target.value)
-                    }
-                    placeholder='Initials'
-                    maxLength={10}
-                    className='w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent'
-                  />
-                </label>
-
-                <div className='text-center'>
-                  <div
-                    className={`px-3 py-2 rounded text-center font-bold ${
-                      entry.balance >= 0
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-red-100 text-red-800'
-                    }`}
-                  >
-                    {entry.balance.toFixed(2)}
-                  </div>
-                </div>
-              </div>
-
-              <div className='flex justify-end gap-2 pt-2'>
-                <button
-                  onClick={() => onDuplicateEntry(entry.id)}
-                  className='px-3 py-2 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg'
-                  title='Duplicate row'
-                >
-                  <span className='inline-flex items-center gap-1'>
-                    <Copy className='w-4 h-4' /> Duplicate
-                  </span>
-                </button>
-                <button
-                  onClick={() => onDeleteEntry(entry.id)}
-                  className='px-3 py-2 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg'
-                  title='Delete row'
-                >
-                  <span className='inline-flex items-center gap-1'>
-                    <Trash2 className='w-4 h-4' /> Delete
-                  </span>
-                </button>
-              </div>
-            </div>
-          </div>
+          <MobileEntryCard
+            key={entry.id}
+            entry={entry}
+            isOpen={expandedId === entry.id}
+            isConfirmingDelete={confirmDeleteId === entry.id}
+            onToggle={() => toggleExpanded(entry.id)}
+            onUpdate={(field, value) => onUpdateEntry(entry.id, field, value)}
+            onDuplicate={() => onDuplicateEntry(entry.id)}
+            onRequestDelete={() => setConfirmDeleteId(entry.id)}
+            onCancelDelete={() => setConfirmDeleteId(null)}
+            onConfirmDelete={() => {
+              onDeleteEntry(entry.id)
+              setConfirmDeleteId(null)
+            }}
+          />
         ))}
       </div>
 
       {/* Desktop: table */}
       <div className='hidden md:block overflow-x-auto'>
         <table className='w-full'>
-          <thead className='bg-gradient-to-r from-amber-200 to-yellow-200 sticky top-0 z-10'>
+          <thead className='bg-brand-900 sticky top-0 z-10'>
             <tr>
-              <th className='px-4 py-4 text-left font-bold text-amber-900'>
+              <th className='px-4 py-3.5 text-left text-xs font-semibold text-gold-100 uppercase tracking-wide'>
                 No
               </th>
-              <th className='px-4 py-4 text-left font-bold text-amber-900'>
+              <th className='px-4 py-3.5 text-left text-xs font-semibold text-gold-100 uppercase tracking-wide'>
                 Date
               </th>
-              <th className='px-4 py-4 text-left font-bold text-amber-900'>
+              <th className='px-4 py-3.5 text-left text-xs font-semibold text-gold-100 uppercase tracking-wide'>
                 Notes (Name)
               </th>
-              <th className='px-4 py-4 text-left font-bold text-amber-900'>
+              <th className='px-4 py-3.5 text-left text-xs font-semibold text-gold-100 uppercase tracking-wide'>
                 In
               </th>
-              <th className='px-4 py-4 text-left font-bold text-amber-900'>
+              <th className='px-4 py-3.5 text-left text-xs font-semibold text-gold-100 uppercase tracking-wide'>
                 Out
               </th>
-              <th className='px-4 py-4 text-left font-bold text-amber-900'>
+              <th className='px-4 py-3.5 text-left text-xs font-semibold text-gold-100 uppercase tracking-wide'>
                 Balance
               </th>
-              <th className='px-4 py-4 text-left font-bold text-amber-900'>
+              <th className='px-4 py-3.5 text-left text-xs font-semibold text-gold-100 uppercase tracking-wide'>
                 Sign
               </th>
-              <th className='px-4 py-4 text-left font-bold text-amber-900 print:hidden'>
+              <th className='px-4 py-3.5 text-left text-xs font-semibold text-gold-100 uppercase tracking-wide print:hidden'>
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className='divide-y divide-gray-200'>
+          <tbody className='divide-y divide-cream-200'>
             {entries.map((entry) => (
               <InventoryRow
                 key={entry.id}

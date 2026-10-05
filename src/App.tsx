@@ -6,6 +6,8 @@ import { FilterControls } from './components/FilterControls'
 import { InventoryTable } from './components/InventoryTable'
 import { ConfirmDialog } from './components/ConfirmDialog'
 import { StartingBalanceDialog } from './components/StartingBalanceDialog'
+import { MobileActionBar } from './components/MobileActionBar'
+import { Toast } from './components/Toast'
 // Removed CSV/Print utilities
 import { Tour } from './components/Tour'
 
@@ -25,6 +27,7 @@ function App() {
     setStartingBalance,
     connectMasterJson,
     isConnected,
+    toast,
   } = useInventory()
 
   const [showClearDialog, setShowClearDialog] = useState(false)
@@ -59,17 +62,15 @@ function App() {
   }
 
   return (
-    <div
-      className='min-h-screen bg-gradient-to-br from-orange-50 to-pink-50'
-      style={{ backgroundColor: '#FFE8E5' }}
-    >
+    <div className='min-h-screen bg-cream-50'>
       <Header
         businessLine={state.businessLine}
         department={state.department}
         onBusinessInfoChange={updateBusinessInfo}
+        onOpenTour={() => setTourOpen(true)}
       />
 
-      <main className='max-w-7xl mx-auto p-6'>
+      <main className='max-w-7xl mx-auto p-6 pb-28 sm:pb-6'>
         <Summary stats={summaryStats} />
 
         <FilterControls
@@ -123,8 +124,8 @@ function App() {
         />
 
         {filteredEntries.length === 0 && state.entries.length > 0 && (
-          <div className='bg-white rounded-lg shadow-md p-8 text-center mt-6'>
-            <div className='text-gray-500'>
+          <div className='bg-white rounded-xl shadow-panel border border-cream-200 p-8 text-center mt-6'>
+            <div className='text-ink-500'>
               No entries match your current filters. Try adjusting your search
               criteria.
             </div>
@@ -150,83 +151,15 @@ function App() {
         onCancel={() => setShowBalanceDialog(false)}
       />
 
-      {/* Help / How to use */}
-      <footer className='max-w-7xl mx-auto p-6 pt-0 text-sm text-gray-700'>
-        <div className='bg-white rounded-lg shadow-md p-6 mt-6'>
-          <h2 className='text-lg font-semibold text-amber-900 mb-3'>Help</h2>
-          <p className='mb-4'>How to use the application:</p>
-          <ol className='list-decimal pl-5 space-y-2'>
-            <li>
-              Click <span className='font-medium'>Connect to Server</span> and
-              create/select a JSON file named after your company, e.g.{' '}
-              <span className='font-mono'>companyName.json</span>.
-            </li>
-            <li>
-              After connecting, click{' '}
-              <span className='font-medium'>Add Row</span> and enter your
-              inventory details.
-            </li>
-            <li>
-              Your data is saved automatically to the connected file as you make
-              changes.
-            </li>
-          </ol>
-          <div className='mt-4'>
-            <button
-              onClick={() => setTourOpen(true)}
-              className='px-3 py-2 rounded bg-amber-600 text-white hover:bg-amber-700 text-sm'
-            >
-              View Quick Tour
-            </button>
-          </div>
-        </div>
-      </footer>
+      <MobileActionBar
+        onAddEntry={addEntry}
+        onSetStartingBalance={handleSetStartingBalance}
+        onConnectMasterJson={connectMasterJson}
+        onOpenTour={() => setTourOpen(true)}
+        isConnected={isConnected}
+      />
 
-      {/* Print Styles */}
-      <style>{`
-        @media print {
-          body {
-            background: white !important;
-          }
-          
-          .print\\:hidden {
-            display: none !important;
-          }
-          
-          .print\\:shadow-none {
-            box-shadow: none !important;
-          }
-          
-          table {
-            break-inside: avoid;
-          }
-          
-          tr {
-            break-inside: avoid;
-          }
-          
-          thead {
-            display: table-header-group;
-          }
-          
-          .bg-gradient-to-br {
-            background: white !important;
-          }
-          
-          .shadow-md {
-            box-shadow: none !important;
-          }
-        }
-        
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .group:hover .opacity-0 {
-          animation: fadeIn 0.2s ease-out forwards;
-        }
-      `}</style>
+      <Toast toast={toast} />
     </div>
   )
 }
